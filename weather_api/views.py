@@ -2,6 +2,12 @@
 from django.shortcuts import render, redirect
 import requests
 from datetime import datetime
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+api_key = os.getenv("OPENWEATHER_API_KEY")
 
 def index(request):
     return render(request, "weather_api/home.html")
@@ -19,7 +25,7 @@ def result(request):
         city = city.split(",")[0].strip()
 
     # Active API Key configuration
-    api_key = "6669059a0f1b90a8c107dd7b591b0071"
+   
     url = f"http://api.openweathermap.org/data/2.5/forecast?q={city}&appid={api_key}&units=metric"
     
     context = {}
