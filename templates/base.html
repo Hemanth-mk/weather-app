@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Weather App{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{% static 'css/new-style.css' %}">
+</head>
+
+<body>
+
+<header class="header">
+    <div class="container flex">
+        <div class="logo">
+            <img src="{% static 'images/logo.png' %}" alt="Weather">
+            <h2>WeatherCast</h2>
+        </div>
+
+        <nav>
+            <ul class="nav">
+                <li><a href="{% url 'home' %}">Home</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<section class="hero">
+    <div class="container">
+        <form class="search-box" method="POST" action="{% url 'result' %}">
+            {% csrf_token %}
+            <input type="text" name="city" placeholder="Enter city name…" required>
+            <button type="submit">Search</button>
+        </form>
+    </div>
+</section>
+
+{% block content %}
+{% endblock %}
+
+<footer class="cyber-footer">
+  <div class="glow">WeatherCast X — Future Weather Engine</div>
+</footer>
+
+<style>
+.cyber-footer {
+    padding: 25px;
+    text-align: center;
+    background: #0b0e17;
+}
+
+.cyber-footer .glow {
+    font-size: 15px;
+    letter-spacing: 2px;
+    color: #00eaff;
+    text-shadow: 0 0 12px #00eaff, 0 0 20px #00eaff;
+    animation: pulse 2s infinite ease-in-out;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+</style>
+

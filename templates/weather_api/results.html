@@ -1,0 +1,359 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ city_name }} // Terminal Overview</title>
+
+    <style>
+        /* ============================
+           ANIME CYBERPUNK BACKGROUND
+        ============================ */
+        body {
+            margin: 0;
+            padding: 0;
+            /* Using the same primary blue background image for brand/theme consistency */
+            background: url("{% static 'images/blue.jpg' %}") no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            color: #dfffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-sizing: border-box;
+        }
+
+        /* Dark semi-transparent overlay to make data readable */
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(4px);
+            z-index: 1;
+        }
+
+        /* Container & Glass Cards */
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 95%;
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .cyber-card {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(0, 255, 255, 0.3);
+            box-shadow: 0 0 25px rgba(0, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .cyber-card:hover {
+            box-shadow: 0 0 35px rgba(0, 255, 255, 0.4);
+            border-color: rgba(0, 255, 255, 0.6);
+        }
+
+        /* Navigation Button */
+        .home-btn {
+            display: inline-block;
+            padding: 10px 25px;
+            background: linear-gradient(90deg, #00eaff, #0080ff);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            text-shadow: 0 0 8px white;
+            box-shadow: 0 0 15px #00eaff;
+            transition: 0.3s ease;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .home-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px #00eaff;
+        }
+
+        /* Typography & Neon Glows */
+        h1.title {
+            font-size: 28px;
+            color: #00eaff;
+            text-shadow: 0 0 10px rgba(0, 254, 255, 0.6);
+            margin-top: 0;
+            margin-bottom: 5px;
+            letter-spacing: 1px;
+        }
+
+        .date-stamp {
+            font-size: 14px;
+            color: #8defff;
+            opacity: 0.8;
+            margin-bottom: 25px;
+        }
+
+        /* Current Weather HUD Layout */
+        .hud-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+            align-items: center;
+        }
+
+        @media (min-width: 600px) {
+            .hud-grid { grid-template-columns: 140px 1fr; }
+        }
+
+        .hud-visual {
+            text-align: center;
+            background: rgba(0, 234, 255, 0.1);
+            border-radius: 15px;
+            padding: 15px;
+            border: 1px dashed rgba(0, 234, 255, 0.4);
+        }
+
+        .hud-visual img {
+            filter: drop-shadow(0 0 8px #00eaff);
+        }
+
+        .main-temp {
+            font-size: 54px;
+            font-weight: 800;
+            margin: 10px 0 0 0;
+            color: #ffffff;
+            text-shadow: 0 0 15px rgba(255,255,255,0.4);
+        }
+
+        .condition-desc {
+            font-size: 20px;
+            color: #00eaff;
+            margin: 0 0 15px 0;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Sci-Fi Metric Telemetry Grid */
+        .telemetry-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        @media(min-width: 768px) {
+            .telemetry-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        .telemetry-item {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .telemetry-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #8defff;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+            opacity: 0.7;
+        }
+
+        .telemetry-value {
+            font-size: 18px;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        /* Forecast Data Table Custom Styling */
+        .forecast-title {
+            font-size: 20px;
+            color: #00eaff;
+            text-shadow: 0 0 8px rgba(0, 254, 255, 0.5);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0, 0, 0, 0.25);
+            text-align: left;
+        }
+
+        th {
+            background: rgba(0, 128, 255, 0.25);
+            color: #00eaff;
+            padding: 14px 16px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 2px solid rgba(0, 255, 255, 0.3);
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.1);
+            font-size: 15px;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(0, 234, 255, 0.05);
+            color: #ffffff;
+        }
+
+        .forecast-weather {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .forecast-icon {
+            width: 30px;
+            height: 30px;
+            filter: drop-shadow(0 0 4px #00eaff);
+        }
+
+        .temp-badge {
+            font-weight: 600;
+        }
+        .temp-max { color: #ff5e5e; }
+        .temp-min { color: #00eaff; }
+
+        /* ============================
+           DYNAMIC ERROR STATE PANEL
+        ============================ */
+        .error-card {
+            border-color: #ff3b30;
+            box-shadow: 0 0 30px rgba(255, 59, 48, 0.4);
+            animation: errorPulse 2s infinite ease-in-out;
+        }
+
+        @keyframes errorPulse {
+            0% { box-shadow: 0 0 15px rgba(255, 59, 48, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(255, 59, 48, 0.6); }
+            100% { box-shadow: 0 0 15px rgba(255, 59, 48, 0.3); }
+        }
+
+        .error-title {
+            color: #ff5b5b;
+            text-shadow: 0 0 10px #ff3b30;
+            font-size: 24px;
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <a href="{% url 'home' %}" class="home-btn">// RETURN TO HOME</a>
+
+    {% if error_state %}
+    <div class="cyber-card error-card">
+        <h2 class="error-title">⚠️ SYSTEM ALERT: LINK TERMINATED</h2>
+        <p style="font-size: 16px; line-height: 1.6; color: #ffcccc;">{{ error_message }}</p>
+        <p style="font-size: 13px; color: #ff8888; opacity: 0.8; margin-bottom: 0;">
+            Recommendation: Verify geographical spelling variants or reinitialize database handshake protocols.
+        </p>
+    </div>
+
+    {% else %}
+    <div class="cyber-card">
+        <h1 class="title">{{ city_name|upper }} // {{ city_country }}</h1>
+        <div class="date-stamp">Telemetry Sync: {{ current.date }}</div>
+
+        <div class="hud-grid">
+            <div class="hud-visual">
+                <img src="http://openweathermap.org/img/wn/{{ current.icon }}@2x.png" alt="Weather Vector">
+                <div class="main-temp">{{ current.temp }}°C</div>
+            </div>
+            
+            <div>
+                <div class="condition-desc">// STATUS: {{ current.description }}</div>
+                
+                <div class="telemetry-grid">
+                    <div class="telemetry-item">
+                        <div class="telemetry-label">Humidity</div>
+                        <div class="telemetry-value">{{ current.humidity }}%</div>
+                    </div>
+                    <div class="telemetry-item">
+                        <div class="telemetry-label">Wind Velocity</div>
+                        <div class="telemetry-value">{{ current.wind }} <span style="font-size:12px;">km/h</span></div>
+                    </div>
+                    <div class="telemetry-item">
+                        <div class="telemetry-label">Barometer</div>
+                        <div class="telemetry-value">{{ current.pressure }} <span style="font-size:12px;">hPa</span></div>
+                    </div>
+                    <div class="telemetry-item">
+                        <div class="telemetry-label">Visibility</div>
+                        <div class="telemetry-value">{{ current.visibility }} <span style="font-size:12px;">km</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cyber-card">
+        <div class="forecast-title">
+            <span>⚡</span> MULTI-DIURNAL PROJECTION MATRIX
+        </div>
+        
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Timeline Sector</th>
+                        <th>Atmospheric Analysis</th>
+                        <th style="text-align: center;">Min Alpha</th>
+                        <th style="text-align: center;">Max Omega</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for day in forecast %}
+                    <tr>
+                        <td style="font-weight: 600; color: #8defff;">{{ day.day }}</td>
+                        <td>
+                            <div class="forecast-weather">
+                                <img src="http://openweathermap.org/img/wn/{{ day.icon }}.png" class="forecast-icon" alt="icon">
+                                <span>{{ day.description }}</span>
+                            </div>
+                        </td>
+                        <td style="text-align: center;" class="temp-badge temp-min">{{ day.min }}°C</td>
+                        <td style="text-align: center;" class="temp-badge temp-max">{{ day.max }}°C</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+</body>
+</html>

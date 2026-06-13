@@ -1,0 +1,155 @@
+{% load static %}  {% block content %}
+<style>
+    /* ============================
+       ANIME CYBERPUNK BACKGROUND
+    ============================ */
+    .anime-bg {
+        width: 100%;
+        height: 100vh;
+        background: url("{% static 'images/blue.jpg' %}") no-repeat center center/cover;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 20px;
+    }
+
+    /* Dark semi-transparent overlay */
+    .anime-bg::after {
+        content: "";
+        position: absolute;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
+        background: rgba(0,0,0,0.45);
+        backdrop-filter: blur(2px);
+    }
+
+    /* ============================
+       FUTURISTIC GLASS CARD
+    ============================ */
+    .cyber-card {
+        position: relative;
+        z-index: 2;
+        width: 90%;
+        max-width: 450px;
+        padding: 35px;
+        border-radius: 20px;
+        background: rgba(255,255,255,0.10);
+        border: 1px solid rgba(0,255,255,0.4);
+        box-shadow: 0 0 35px rgba(0,255,255,0.4);
+        backdrop-filter: blur(12px);
+        text-align: center;
+        animation: glowPulse 4s infinite ease-in-out;
+    }
+
+    @keyframes glowPulse {
+        0% { box-shadow: 0 0 15px rgba(0, 255, 255, 0.4); }
+        50% { box-shadow: 0 0 40px rgba(0, 255, 255, 0.9); }
+        100% { box-shadow: 0 0 15px rgba(0, 255, 255, 0.4); }
+    }
+
+    /* Title */
+    .cyber-title {
+        font-size: 32px;
+        color: #00eaff;
+        text-shadow: 0 0 10px #00eaff;
+        margin-bottom: 10px;
+        letter-spacing: 2px;
+        font-weight: 700;
+    }
+
+    .cyber-sub {
+        color: #c8ffff;
+        font-size: 15px;
+        margin-bottom: 25px;
+        opacity: 0.9;
+    }
+
+    /* Input */
+    .cyber-input {
+        width: 100%;
+        padding: 15px 20px;
+        font-size: 16px;
+        border-radius: 12px;
+        border: 2px solid rgba(0,255,255,0.5);
+        background: rgba(0,0,0,0.6);
+        color: #dfffff;
+        outline: none;
+        margin-bottom: 20px;
+        box-shadow: inset 0 0 15px rgba(0,255,255,0.4);
+        box-sizing: border-box;
+    }
+
+    .cyber-input::placeholder {
+        color: #8defff;
+    }
+
+    /* Button */
+    .cyber-btn {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(90deg, #00eaff, #0080ff);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-size: 16px;
+        font-weight: 600;
+        text-shadow: 0 0 8px white;
+        cursor: pointer;
+        transition: 0.3s ease;
+        box-shadow: 0 0 15px #00eaff;
+    }
+
+    .cyber-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 25px #00eaff;
+    }
+</style>
+
+<div class="anime-bg">
+    <div class="cyber-card">
+        <h1 class="cyber-title">WeatherCast X</h1>
+        <p class="cyber-sub">Futuristic AI Weather Engine</p>
+
+        <form action="{% url 'result' %}" method="POST">
+            {% csrf_token %}
+            <input type="text" name="city" id="city-input" class="cyber-input" placeholder="Enter City..." autocomplete="off" list="cities-data" required>
+            
+            <datalist id="cities-data"></datalist>
+            
+            <button type="submit" class="cyber-btn">Check Weather</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    const cityInput = document.getElementById('city-input');
+    const dataList = document.getElementById('cities-data');
+
+    cityInput.addEventListener('input', async function() {
+        const query = this.value.trim();
+        
+        if (query.length < 3) {
+            dataList.innerHTML = '';
+            return;
+        }
+
+        try {
+            const url = `https://secure.geonames.org/searchJSON?q=${encodeURIComponent(query)}&maxRows=5&username=demo&featureClass=P`;
+            const response = await fetch(url);
+            const data = await response.json();
+
+            dataList.innerHTML = '';
+
+            if (data.geonames) {
+                data.geonames.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = `${city.name}, ${city.countryCode}`;
+                    dataList.appendChild(option);
+                });
+            }
+        } catch (error) {
+            console.log("Autocomplete suggestion link offline:", error);
+        }
+    });
+</script>
+{% endblock %}
